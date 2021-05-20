@@ -2,7 +2,7 @@
 apiVersion: io.orquestra.workflow/1.0.0
 
 # Prefix for workflow ID
-name: qcbm-opt
+name: qcbm-opt-4l
 
 imports:
 - name: bars-and-stripes
@@ -46,7 +46,7 @@ steps:
       memory: "1Gi"
       disk: "10Gi"
   inputs:
-    - ansatz_specs: '{"module_name": "zquantum.qcbm.ansatz", "function_name": "QCBMAnsatz", "number_of_layers": 8, "number_of_qubits": 16, "topology": "all"}'
+    - ansatz_specs: '{"module_name": "zquantum.qcbm.ansatz", "function_name": "QCBMAnsatz", "number_of_layers": 4, "number_of_qubits": 16, "topology": "all"}'
       type: string
     - min_value: -1.57
       type: float
@@ -97,7 +97,7 @@ steps:
   inputs:
   - n_qubits: 16
     type: int
-  - n_layers: 8
+  - n_layers: 4
     type: int
   - topology: all
     type: string
