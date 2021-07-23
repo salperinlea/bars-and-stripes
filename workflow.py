@@ -13,8 +13,7 @@ from zquantum.core.utils import load_from_specs
 from zquantum.qcbm.ansatz import QCBMAnsatz
 from zquantum.qcbm.cost_function import QCBMCostFunction
 from qequlacs import QulacsSimulator
-from target import bars_and_stripes_zigzag
-
+import itertools
 import random
 
 def get_rc(n):
@@ -117,8 +116,17 @@ def generate_random_ansatz_params(
     ),
 )
 def get_distribution(n: int):
-    row,col = get_rc(n)
-    data = bars_and_stripes_zigzag(row, col)
+    nrows,ncols = get_rc(n)
+    data = []
+    for h in itertools.product([0, 1], repeat=ncols):
+        pic = np.repeat([h], nrows, 0)
+        data.append(pic.ravel().tolist())
+
+    for h in itertools.product([0, 1], repeat=nrows):
+        pic = np.repeat([h], ncols, 1)
+        data.append(pic.ravel().tolist())
+
+    data = np.unique(np.asarray(data), axis=0)
     num_desired_patterns = int(len(data))
     num_desired_patterns = max(num_desired_patterns, 1)
     data = random.sample(list(data), num_desired_patterns)
