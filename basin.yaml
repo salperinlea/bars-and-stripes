@@ -2,7 +2,7 @@
 apiVersion: io.orquestra.workflow/1.0.0
 
 # Prefix for workflow ID
-name: top40-rmsprop-4-qhipster
+name: qcbm-opt-16q4l-basin
 
 imports:
 - name: bars-and-stripes
@@ -14,7 +14,7 @@ imports:
   type: git
   parameters:
     repository: "git@github.com:zapatacomputing/z-quantum-core.git"
-    branch: "gd_opt_hotfix"
+    branch: "master"
 - name: z-quantum-qcbm
   type: git
   parameters:
@@ -24,11 +24,11 @@ imports:
   type: git
   parameters:
     repository: "git@github.com:zapatacomputing/z-quantum-optimizers.git"
-    branch: "gd_opt_troubleshoot"
-- name: qe-qhipster
+    branch: "master"
+- name: qe-qulacs
   type: git
   parameters:
-    repository: "git@github.com:zapatacomputing/qe-qhipster.git"
+    repository: "git@github.com:zapatacomputing/qe-qulacs.git"
     branch: "master"
 
 steps:
@@ -42,11 +42,11 @@ steps:
         file: z-quantum-core/steps/circuit.py
         function: generate_random_ansatz_params
     resources:
-      cpu: "1000m"
+      cpu: "2000m"
       memory: "1Gi"
       disk: "10Gi"
   inputs:
-    - ansatz_specs: '{"module_name": "zquantum.qcbm.ansatz", "function_name": "QCBMAnsatz", "number_of_layers": 4, "number_of_qubits": 12, "topology": "all"}'
+    - ansatz_specs: '{"module_name": "zquantum.qcbm.ansatz", "function_name": "QCBMAnsatz", "number_of_layers": 4, "number_of_qubits": 16, "topology": "all"}'
       type: string
     - min_value: -1.57
       type: float
@@ -72,7 +72,7 @@ steps:
   inputs:
     - nrows: 4
       type: int
-    - ncols: 3
+    - ncols: 4
       type: int
     - fraction: 1.0
       type: float
@@ -87,16 +87,15 @@ steps:
   config:
     runtime:
       language: python3
-      customImage: "zapatacomputing/qe-qhipster"
-      imports:  [z-quantum-core, z-quantum-optimizers, z-quantum-qcbm, qe-qhipster]
+      imports:  [z-quantum-core, z-quantum-optimizers, z-quantum-qcbm, qe-qulacs]
       parameters:
         file: z-quantum-qcbm/steps/optimize_variational_qcbm_circuit.py
         function: optimize_variational_qcbm_circuit
     resources:
       cpu: "2000m"
-      memory: "12Gi"
+      memory: "14Gi"
   inputs:
-  - n_qubits: 12
+  - n_qubits: 16
     type: int
   - n_layers: 4
     type: int
@@ -109,24 +108,19 @@ steps:
   - distance_measure_parameters: '{"epsilon": 1e-6}'
     type: string
   - backend_specs:
-      module_name: qeqhipster.simulator
-      function_name: QHipsterSimulator
+      module_name: qequlacs.simulator
+      function_name: QulacsSimulator
     type: specs
   - optimizer_specs:
-      module_name: zquantum.optimizers.gd_optimizer
-      function_name: GDOptimizer
-      method: 'rmsprop'
-      options:
-        maxiter: 600
-        lr: 0.01
-        tol: 1e-4
+      module_name: zquantum.optimizers.basin_hopping
+      function_name: BasinHoppingOptimizer
+      niter: 50
+      minimizer_kwargs: {"method":"L-BFGS-B"}
     type: specs
   - initial_parameters: ((get-initial-parameters.params))
     type: ansatz-params
   - target_distribution: ((get-bars-and-stripes-distribution.distribution))
     type: bitstring-distribution
-  - keep_history: True
-    type: bool
   outputs:
     - name: qcbm-optimization-results
       type: optimization-results

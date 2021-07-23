@@ -23,7 +23,7 @@ def get_ordered_list_of_bitstrings(num_qubits):
 
 
 # Insert the path to your JSON file here
-with open("workflow_result.json") as f:
+with open('qcbm-opt-12q3l-basin-4ed829df-edc7-43b6-8a84-cc5143a5cf97_result.json') as f:
     data = json.load(f)
 
 # Extract target/measured bitstring distribution and distance measure values.
@@ -32,7 +32,7 @@ minimum_distances = []
 bitstring_distributions = []
 
 current_minimum = 100000
-number_of_qubits = 16
+number_of_qubits = 9
 for step_id in data:
     step = data[step_id]
     # if step["stepName"] == "get-initial-parameters":
@@ -52,6 +52,7 @@ for step_id in data:
         exact_distance_value = entropy(target_distribution)
         print(exact_distance_value)
     elif step["stepName"] == "optimize-circuit":
+        print(len(step["qcbm-optimization-results"]["history"]))
         for evaluation in step["qcbm-optimization-results"]["history"]:
             distances.append(evaluation["value"]["value"])
             current_minimum = min(current_minimum, evaluation["value"]["value"])
@@ -66,49 +67,23 @@ for step_id in data:
                 except:
                     bitstring_dist.append(0)
             bitstring_distributions.append(bitstring_dist)
+print(current_minimum)
 
 fig = plt.figure(figsize=(16, 8))
-
-evals = []
-plotted_distances = []
-plotted_min_distances = []
-line_widths = []
-
-
-def animate(i):
-    evals.append(i)
-    plotted_distances.append(distances[i])
-    plotted_min_distances.append(minimum_distances[i])
-    line_widths.append(1)
-    fig.clear()
-    fig.set(
-        xlabel="Evaluation Index",
-        ylabel="Clipped negative log-likelihood cost function",
-    )
-    fig.set_ylim([exact_distance_value - 0.1, exact_distance_value + 1.5])
-    fig.scatter(
-        evals, plotted_distances, color="green", linewidths=line_widths, marker="."
-    )
-    fig.hlines(
+x_range=[i for i in range(len(distances))]
+plt.xlabel('Evaluation')
+plt.ylabel('Clipped Log-Likelihood')
+plt.legend(loc="upper right")
+plt.plot(x_range,distances,color='green',marker='.')
+plt.plot(x_range,minimum_distances,color='purple')
+plt.hlines(
         y=exact_distance_value,
         xmin=0,
-        xmax=evals[-1],
+        xmax=x_range[-1],
         color="darkgreen",
         label="expected",
         alpha=0.8,
         linestyle="--",
     )
-    fig.legend(loc="upper right")
-    fig.plot(evals, plotted_min_distances, color="purple", linewidth=2)
-
-    return fig
-
-
-anim = FuncAnimation(fig, animate, frames=700, interval=1, repeat=False)
-
-# # Set up formatting for the movie files
-# Writer = animation.writers['ffmpeg']
-# writer = Writer(fps=10, metadata=dict(artist='Me'), bitrate=1800)
-# anim.save('qcbm_opt_700_iterations.mp4', writer=writer)
-
+plt.legend(loc="upper right")
 plt.show()

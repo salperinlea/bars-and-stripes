@@ -23,7 +23,7 @@ def get_ordered_list_of_bitstrings(num_qubits):
 
 
 # Insert the path to your JSON file here
-with open("workflow_result.json") as f:
+with open("small_result.json") as f:
     data = json.load(f)
 
 # Extract target/measured bitstring distribution and distance measure values.
