@@ -6,6 +6,7 @@ import json
 
 from zquantum.core.utils import create_object
 from zquantum.core.interfaces.ansatz import Ansatz
+from zquantum.core.serialization import save_optimization_results
 import zquantum.core.bitstring_distribution
 from zquantum.core.bitstring_distribution import BitstringDistribution
 from zquantum.core.typing import Specs
@@ -32,9 +33,9 @@ def get_rc(n):
 
 @qe.step(
     resource_def=qe.ResourceDefinition(
-        cpu="1000m",
-        memory="1000Mi",
-        disk="1Gi",
+        cpu="2000m",
+        memory="10Gi",
+        disk="2Gi",
     ),
 )
 def get_specs(method: str,options: dict):
@@ -64,7 +65,7 @@ def get_specs(method: str,options: dict):
         minimizer_kwargs['method'] = specialized
         for k,v in options.items():
             if k == 'minimizer_kwargs':
-                for q,p in v.keys():
+                for q,p in v.items():
                     minimizer_kwargs[q]=p
             else:
                 specs[k]=v
@@ -75,9 +76,9 @@ def get_specs(method: str,options: dict):
 
 @qe.step(
     resource_def=qe.ResourceDefinition(
-        cpu="1000m",
-        memory="1000Mi",
-        disk="1Gi",
+        cpu="2000m",
+        memory="10Gi",
+        disk="2Gi",
     ),
 )
 def get_ansatz(n_qubits:int,n_layers:int):
@@ -86,9 +87,9 @@ def get_ansatz(n_qubits:int,n_layers:int):
 
 @qe.step(
     resource_def=qe.ResourceDefinition(
-        cpu="1000m",
-        memory="1000Mi",
-        disk="1Gi",
+        cpu="2000m",
+        memory="10Gi",
+        disk="2Gi",
     ),
 )
 def generate_random_ansatz_params(
@@ -110,9 +111,9 @@ def generate_random_ansatz_params(
 
 @qe.step(
     resource_def=qe.ResourceDefinition(
-        cpu="1000m",
-        memory="1000Mi",
-        disk="1Gi",
+        cpu="2000m",
+        memory="10Gi",
+        disk="2Gi",
     ),
 )
 def get_distribution(n: int):
@@ -143,9 +144,9 @@ def get_distribution(n: int):
 
 @qe.step(
     resource_def=qe.ResourceDefinition(
-        cpu="1000m",
-        memory="1000Mi",
-        disk="1Gi",
+        cpu="2000m",
+        memory="10Gi",
+        disk="10Gi"
     ),
 )
 def optimize_variational_qcbm_circuit(
@@ -167,8 +168,9 @@ def optimize_variational_qcbm_circuit(
         target_distribution,
     )
     opt_results = optimizer.minimize(cost_function, initial_parameters, keep_history)
+    #save_optimization_results(opt_results, "qcbm-optimization-results.json")
     return opt_results
-@qe.workflow(name='top40-{method}-{tag}',
+@qe.workflow(name='top40-{n_layers}-{method}-{tag}',
               import_defs=[
                   qe.GitImportDefinition.get_current_repo_and_branch(),
                   qe.GitImportDefinition(
@@ -200,11 +202,12 @@ def workflow(n_layers: int, n_qubits: int,method: str,options: dict, keep_histor
     return output
 
 if __name__ == "__main__":
-    n_layers=3
+    n_layers=4
     n_qubits=12
-    method,options ='adam',{'lr':0.001,'maxiter':5,'tol':1e-4}
-    wf = workflow(n_layers,n_qubits,method,options,tag='a')
+    #method,options ='adam',{'lr':0.01,'maxiter':2000,'tol':1e-5}
+    method,options ='basin-l-bfgs-b', {'niter':50,'minimizer_kwargs':{'method':'l-bfgs-b','maxiter':500}}
+    wf = workflow(n_layers,n_qubits,method,options,tag='b')
     #wf.validate()
     #qe.run_local_workflow(wf)
     out= wf.submit()
-    out.watch_and_get_result()
+    #out.watch_and_get_result()
