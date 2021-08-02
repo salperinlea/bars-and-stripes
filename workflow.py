@@ -1,5 +1,4 @@
 import qe.sdk.v1 as qe
-import qe.sdk.v1
 import numpy as np
 import typing
 from typing import List, Optional, Union
@@ -17,6 +16,7 @@ from zquantum.qcbm.cost_function import QCBMCostFunction
 from qequlacs import QulacsSimulator
 import itertools
 import random
+import csv
 
 def get_rc(n):
     assert isinstance(n,int)
@@ -82,8 +82,8 @@ def get_specs(method: str,options: dict):
         disk="2Gi",
     ),
 )
-def get_ansatz(n_qubits:int,n_layers:int,typology:str):
-    return QCBMAnsatz(n_layers,n_qubits,typology)
+def get_ansatz(n_qubits:int,n_layers:int,topology:str):
+    return QCBMAnsatz(n_layers,n_qubits,topology)
 
 
 @qe.step(
@@ -171,7 +171,7 @@ def optimize_variational_qcbm_circuit(
     opt_results = optimizer.minimize(cost_function, initial_parameters, keep_history)
     #save_optimization_results(opt_results, "qcbm-optimization-results.json")
     return opt_results
-@qe.workflow(name='top20-{n_layers}-{toplogy}-{method}-{tag}',
+@qe.workflow(name='top20-{n_layers}-{topology}-{method}-{tag}',
               import_defs=[
                   qe.GitImportDefinition.get_current_repo_and_branch(),
                   qe.GitImportDefinition(
@@ -192,9 +192,9 @@ def optimize_variational_qcbm_circuit(
                   )
 
               ])
-def workflow(n_layers: int, n_qubits: int, typology: str, method: str,options: dict, keep_history: bool = True, tag: str = None):
+def workflow(n_layers: int, n_qubits: int, topology: str, method: str,options: dict, keep_history: bool = True, tag: int = None):
     target_distribution=get_distribution(n_qubits)
-    ansatz=get_ansatz(n_qubits,n_layers,typology)
+    ansatz=get_ansatz(n_qubits,n_layers,topology)
     initial_parameters=generate_random_ansatz_params(ansatz)
     optimizer_specs=get_specs(method,options)
     output = optimize_variational_qcbm_circuit(ansatz,optimizer_specs,
@@ -205,11 +205,22 @@ def workflow(n_layers: int, n_qubits: int, typology: str, method: str,options: d
 if __name__ == "__main__":
     n_layers=3
     n_qubits=12
-    typology='all'
+    topology='all'
     method,options ='adam',{'lr':0.01,'maxiter':3500}
+    filename="top20_ids.csv"
     #method,options ='l-bfgs-b', {'ftol':1e-9,'gtol':1e-9,'maxiter':4000,'maxfun':int(1e9),}
     #method,options ='basin-l-bfgs-b', {'niter':50,'minimizer_kwargs':{'method':'l-bfgs-b','maxiter':500}}
-    for tag in range(0,10):
-        qe.sdk.v1.step.unique_names = []
-        wf = workflow(n_layers,n_qubits,method,options,tag=tag)
-        out= wf.submit()
+    with open(filename, 'a+') as file:
+        fieldnames = ['n_layers', 'topology', 'method', 'id']
+        w = csv.DictWriter(file, fieldnames=fieldnames)
+        if file.tell() == 0:
+            w.writeheader()
+        for tag in range(0,10):
+            qe.step.unique_names = []
+            wf = workflow(n_layers,n_qubits,topology,method,options,tag=tag)
+            out = wf.submit()
+            id = out.workflow_id
+            writeout={'topology':topology,'layers':n_layers,'method':method,'id':id}
+            print(id)
+            w.writerow(writeout)
+
