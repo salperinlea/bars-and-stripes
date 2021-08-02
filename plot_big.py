@@ -27,7 +27,7 @@ def get_ordered_list_of_bitstrings(num_qubits):
 #with open('./results/top40-adam-b-cedb21be-7eca-4f3e-acbb-55703470f230_result.json') as f:
  #   data = json.load(f)
 
-data=qe.load_workflowresult('top40-3-adam-first')
+data=qe.load_workflowresult('top40-4-adam-b')
 #print(data)
 # Extract target/measured bitstring distribution and distance measure values.
 distances = []
@@ -43,7 +43,7 @@ for step_id in data.steps:
     #         eval(step["inputParam:ansatz-specs"])["number_of_qubits"]
     #     )
     ordered_bitstrings = get_ordered_list_of_bitstrings(number_of_qubits)
-    if step_id == "get-distribution":
+    if "get-distribution" in step_id:
         target_distribution = []
         for key in ordered_bitstrings:
             try:
@@ -55,7 +55,7 @@ for step_id in data.steps:
                 target_distribution.append(0)
         exact_distance_value = entropy(target_distribution)
         print("Entropy of true distribution: ",exact_distance_value)
-    elif step_id in ["optimize-variational-qcbm-circuit", 'optimize-circuit']:
+    elif any([x in step_id for x in ["optimize-variational-qcbm-circuit", 'optimize-circuit']]):
         #print(type(step.result))
         #print(step.result.history)
         for evaluation in step.result.history:

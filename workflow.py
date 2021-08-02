@@ -1,4 +1,5 @@
 import qe.sdk.v1 as qe
+import qe.sdk.v1
 import numpy as np
 import typing
 from typing import List, Optional, Union
@@ -81,8 +82,8 @@ def get_specs(method: str,options: dict):
         disk="2Gi",
     ),
 )
-def get_ansatz(n_qubits:int,n_layers:int):
-    return QCBMAnsatz(n_layers,n_qubits,'all')
+def get_ansatz(n_qubits:int,n_layers:int,typology:str):
+    return QCBMAnsatz(n_layers,n_qubits,typology)
 
 
 @qe.step(
@@ -170,7 +171,7 @@ def optimize_variational_qcbm_circuit(
     opt_results = optimizer.minimize(cost_function, initial_parameters, keep_history)
     #save_optimization_results(opt_results, "qcbm-optimization-results.json")
     return opt_results
-@qe.workflow(name='top40-{n_layers}-{method}-{tag}',
+@qe.workflow(name='top20-{n_layers}-{toplogy}-{method}-{tag}',
               import_defs=[
                   qe.GitImportDefinition.get_current_repo_and_branch(),
                   qe.GitImportDefinition(
@@ -191,9 +192,9 @@ def optimize_variational_qcbm_circuit(
                   )
 
               ])
-def workflow(n_layers: int, n_qubits: int,method: str,options: dict, keep_history: bool = True, tag: str = None):
+def workflow(n_layers: int, n_qubits: int, typology: str, method: str,options: dict, keep_history: bool = True, tag: str = None):
     target_distribution=get_distribution(n_qubits)
-    ansatz=get_ansatz(n_qubits,n_layers)
+    ansatz=get_ansatz(n_qubits,n_layers,typology)
     initial_parameters=generate_random_ansatz_params(ansatz)
     optimizer_specs=get_specs(method,options)
     output = optimize_variational_qcbm_circuit(ansatz,optimizer_specs,
@@ -202,12 +203,13 @@ def workflow(n_layers: int, n_qubits: int,method: str,options: dict, keep_histor
     return output
 
 if __name__ == "__main__":
-    n_layers=4
+    n_layers=3
     n_qubits=12
-    #method,options ='adam',{'lr':0.01,'maxiter':2000,'tol':1e-5}
-    method,options ='basin-l-bfgs-b', {'niter':50,'minimizer_kwargs':{'method':'l-bfgs-b','maxiter':500}}
-    wf = workflow(n_layers,n_qubits,method,options,tag='b')
-    #wf.validate()
-    #qe.run_local_workflow(wf)
-    out= wf.submit()
-    #out.watch_and_get_result()
+    typology='all'
+    method,options ='adam',{'lr':0.01,'maxiter':3500}
+    #method,options ='l-bfgs-b', {'ftol':1e-9,'gtol':1e-9,'maxiter':4000,'maxfun':int(1e9),}
+    #method,options ='basin-l-bfgs-b', {'niter':50,'minimizer_kwargs':{'method':'l-bfgs-b','maxiter':500}}
+    for tag in range(0,10):
+        qe.sdk.v1.step.unique_names = []
+        wf = workflow(n_layers,n_qubits,method,options,tag=tag)
+        out= wf.submit()
