@@ -164,7 +164,6 @@ def optimize_variational_qcbm_circuit(
     cost_function = QCBMCostFunction(
         ansatz=ansatz,
         backend=backend,
-        n_samples=None,
         distance_measure=zquantum.core.bitstring_distribution.compute_clipped_negative_log_likelihood,
         distance_measure_parameters={"epsilon": 1e-6},
         target_bitstring_distribution=target_distribution,
@@ -216,12 +215,12 @@ if __name__ == "__main__":
         w = csv.DictWriter(file, fieldnames=fieldnames)
         if file.tell() == 0:
             w.writeheader()
-        for tag in range(0,10):
+        for tag in range(0,1):
             qe.step.unique_names = []
             wf = workflow(n_layers,n_qubits,topology,method,options,tag=tag)
             out = wf.submit()
             id = out.workflow_id
             writeout={'topology':topology,'n_layers':n_layers,'method':method,'id':id}
             print(id)
-            w.writerow(writeout)
+            #w.writerow(writeout)
 
