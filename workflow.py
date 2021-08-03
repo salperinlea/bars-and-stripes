@@ -177,11 +177,11 @@ def optimize_variational_qcbm_circuit(
                   qe.GitImportDefinition.get_current_repo_and_branch(),
                   qe.GitImportDefinition(
                       repo_url="git@github.com:zapatacomputing/z-quantum-core.git",
-                      branch_name="gd_opt_hotfix",
+                      branch_name="master",
                   ),
                   qe.GitImportDefinition(
                       repo_url="git@github.com:zapatacomputing/z-quantum-optimizers.git",
-                      branch_name="gd_opt_troubleshoot",
+                      branch_name="gd_opt",
                   ),
                   qe.GitImportDefinition(
                       repo_url="git@github.com:zapatacomputing/z-quantum-qcbm.git",
