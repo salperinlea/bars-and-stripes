@@ -208,10 +208,12 @@ if __name__ == "__main__":
     n_layers=3
     n_qubits=12
     topology='all'
-    #method,options ='rmsprop',{'lr':0.01,'maxiter':3500}
     filename="top20_ids.csv"
-    method,options ='l-bfgs-b', {'ftol':1e-12,'gtol':1e-12,'maxiter':3500,'maxfun':int(1e9),}
+
+    method,options ='rmsprop',{'lr':0.01,'maxiter':3500}
+    #method,options ='l-bfgs-b', {'ftol':1e-12,'gtol':1e-12,'maxiter':3500,'maxfun':int(1e9),}
     #method,options ='basin-l-bfgs-b', {'niter':50,'minimizer_kwargs':{'method':'l-bfgs-b','maxiter':500}}
+
     with open(filename, 'a+') as file:
         fieldnames = ['n_layers', 'topology', 'method', 'id']
         w = csv.DictWriter(file, fieldnames=fieldnames)
