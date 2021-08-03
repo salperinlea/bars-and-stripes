@@ -162,11 +162,12 @@ def optimize_variational_qcbm_circuit(
         optimizer_specs = json.loads(optimizer_specs)
     optimizer = create_object(optimizer_specs)
     cost_function = QCBMCostFunction(
-        ansatz,
-        backend,
-        zquantum.core.bitstring_distribution.compute_clipped_negative_log_likelihood,
-        {"epsilon": 1e-6},
-        target_distribution,
+        ansatz=ansatz,
+        backend=backend,
+        n_samples=None,
+        distance_measure=zquantum.core.bitstring_distribution.compute_clipped_negative_log_likelihood,
+        distance_measure_parameters={"epsilon": 1e-6},
+        target_bitstring_distribution=target_distribution,
     )
     opt_results = optimizer.minimize(cost_function, initial_parameters, keep_history)
     #save_optimization_results(opt_results, "qcbm-optimization-results.json")
@@ -206,7 +207,7 @@ if __name__ == "__main__":
     n_layers=3
     n_qubits=12
     topology='all'
-    method,options ='adam',{'lr':0.01,'maxiter':3500}
+    method,options ='rmsprop',{'lr':0.01,'maxiter':3500}
     filename="top20_ids.csv"
     #method,options ='l-bfgs-b', {'ftol':1e-9,'gtol':1e-9,'maxiter':4000,'maxfun':int(1e9),}
     #method,options ='basin-l-bfgs-b', {'niter':50,'minimizer_kwargs':{'method':'l-bfgs-b','maxiter':500}}
@@ -220,7 +221,7 @@ if __name__ == "__main__":
             wf = workflow(n_layers,n_qubits,topology,method,options,tag=tag)
             out = wf.submit()
             id = out.workflow_id
-            writeout={'topology':topology,'layers':n_layers,'method':method,'id':id}
+            writeout={'topology':topology,'n_layers':n_layers,'method':method,'id':id}
             print(id)
             w.writerow(writeout)
 
