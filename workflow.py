@@ -57,6 +57,7 @@ def get_specs(method: str,options: dict):
         specs['function_name']='GDOptimizer'
 
     elif method in ['cobyla','l-bfgs-b','bfgs']:
+        specs['method'] = method
         specs["module_name"]="zquantum.optimizers.scipy_optimizer"
         specs['function_name']='ScipyOptimizer'
         specs['options']=options
