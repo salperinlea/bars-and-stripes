@@ -165,7 +165,7 @@ def optimize_variational_qcbm_circuit(
     cost_function = QCBMCostFunction(
         ansatz=ansatz,
         backend=backend,
-        n_samples = 0,
+        n_samples = None,
         distance_measure=zquantum.core.bitstring_distribution.compute_clipped_negative_log_likelihood,
         distance_measure_parameters={"epsilon": 1e-6},
         target_bitstring_distribution=target_distribution,
