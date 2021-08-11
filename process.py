@@ -26,7 +26,6 @@ def get_ordered_list_of_bitstrings(num_qubits):
 
 #calculate how many parameters, moments, etc. are in each ansatz.
 parcounts={}
-
 for i in [3,4,6]:
     for j in ['all','star','line']:
         ans=QCBMAnsatz(number_of_qubits=12,number_of_layers=i,topology=j)

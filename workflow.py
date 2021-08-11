@@ -4,6 +4,8 @@ import typing
 from typing import List, Optional, Union
 import json
 
+from zquantum.core.history.recorder import recorder
+from zquantum.core.history.save_conditions import every_nth
 from zquantum.core.utils import create_object
 from zquantum.core.interfaces.ansatz import Ansatz
 from zquantum.core.serialization import save_optimization_results
@@ -74,6 +76,7 @@ def get_specs(method: str,options: dict):
         specs['minimizer_kwargs']=minimizer_kwargs
         specs['module_name']='zquantum.optimizers.basin_hopping'
         specs['function_name']='BasinHoppingOptimizer'
+    specs['recorder'] = lambda x: recorder(x,save_condition=every_nth(5))
     return specs
 
 @qe.step(
