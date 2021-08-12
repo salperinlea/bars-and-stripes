@@ -213,7 +213,7 @@ if __name__ == "__main__":
     topology='all'
     filename="top20_ids.csv"
 
-    method,options ='rmsprop',{'lr':0.01,'maxiter':3500}
+    method,options ='rmsprop',{'lr':0.01,'maxiter':30}
     #method,options ='l-bfgs-b', {'ftol':1e-12,'gtol':1e-12,'maxiter':3500,'maxfun':int(1e9),}
     #method,options ='basin-l-bfgs-b', {'niter':50,'minimizer_kwargs':{'method':'l-bfgs-b','maxiter':500}}
 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
         w = csv.DictWriter(file, fieldnames=fieldnames)
         if file.tell() == 0:
             w.writeheader()
-        for tag in range(0,1):
+        for tag in range(0,2):
             qe.step.unique_names = []
             wf = workflow(n_layers,n_qubits,topology,method,options,tag=tag)
             out = wf.submit()
